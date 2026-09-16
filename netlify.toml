@@ -1,0 +1,4 @@
+# ShuttleUp is a static site — no build step.
+# Netlify: publish directory = root of the repo, build command = (leave empty)
+[build]
+  publish = "."

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShuttleUp · Badminton Tournament Manager</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="topbar no-print" id="topbar" hidden>
+  <a class="brand" href="#/home">🏸 <b>ShuttleUp</b><span class="brand-sub">Tournament Manager</span></a>
+  <div class="top-chips">
+    <span class="chip chip-on" id="chip-user"></span>
+    <button class="btn ghost sm" id="btn-signout">Sign out</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= AUTH ================= -->
+  <section id="screen-auth" class="screen">
+    <div class="auth-card card">
+      <div class="auth-brand">🏸 <b>ShuttleUp</b></div>
+      <p class="plan-note">For tournament managers — create tournaments, register your players, draw the groups and run live scores. Players don't need an account: they follow everything through your shared link.</p>
+      <div class="auth-tabs">
+        <button class="tab active" id="authTab-signup" type="button">Create account</button>
+        <button class="tab" id="authTab-login" type="button">Sign in</button>
+      </div>
+      <form id="authForm">
+        <div class="field" id="authNameWrap">
+          <label for="authName">Your name</label>
+          <input id="authName" type="text" placeholder="e.g. Marvin" required>
+        </div>
+        <div class="field">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="authPass">Password</label>
+          <input id="authPass" type="password" placeholder="6+ characters" required minlength="6">
+        </div>
+        <button class="btn primary big" type="submit" id="authSubmit">Create account</button>
+        <p class="plan-note auth-err" id="authErr"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= HOME ================= -->
+  <section id="screen-home" class="screen" hidden>
+    <div class="card">
+      <h2>Create a tournament</h2>
+      <div class="create-row">
+        <div class="field grow">
+          <label for="newName">Tournament name</label>
+          <input id="newName" type="text" placeholder="e.g. Friday Night Smash" maxlength="60">
+        </div>
+        <button class="btn primary" id="btn-create">＋ Create tournament</button>
+      </div>
+      <p class="plan-note">You're the organizer — you register the players, draw the groups, score the games and share a live link.</p>
+    </div>
+
+    <nav class="tabs" id="homeTabs">
+      <button class="tab active" data-tab="tournaments">Tournament history</button>
+      <button class="tab" data-tab="players">Players <span class="tab-count" id="rosterCount"></span></button>
+    </nav>
+
+    <div id="homeTab-tournaments">
+      <div id="myTournaments"></div>
+    </div>
+
+    <div id="homeTab-players" hidden>
+      <div class="card">
+        <h2>Your players <span class="h2-sub" id="rosterSub"></span></h2>
+        <p class="plan-note">Everyone you've ever registered — pick them with one tap when you register a new tournament, or add new people on the fly.</p>
+        <div class="field">
+          <label for="rosterSearch">Search your players</label>
+          <input id="rosterSearch" type="text" placeholder="Start typing a name…">
+        </div>
+        <div id="rosterList" class="entry-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TOURNAMENT ================= -->
+  <section id="screen-tournament" class="screen" hidden>
+    <div class="card" id="tHeader"></div>
+
+    <div id="orgView">
+      <nav class="tabs" id="orgTabs">
+        <button class="tab active" data-tab="setup">Setup</button>
+        <button class="tab" data-tab="players">Players</button>
+        <button class="tab" data-tab="groups" disabled>Groups</button>
+        <button class="tab" data-tab="schedule" disabled>Schedule</button>
+        <button class="tab" data-tab="bracket" disabled>Bracket</button>
+      </nav>
+
+      <div id="tab-players">
+        <div class="card">
+          <h2>Share the live view</h2>
+          <div class="invite-box">
+            <div class="qr-wrap"><img id="inviteQr" alt="QR code"></div>
+            <div class="invite-info">
+              <label>Share this link (or scan the QR on the day)</label>
+              <div class="invite-row">
+                <input id="inviteLink" type="text" readonly>
+                <button class="btn ghost sm" id="btn-copy-link">Copy</button>
+              </div>
+              <p class="plan-note">Anyone with this link sees the schedule, groups and <b>live results</b> — no account needed. You add and edit all players yourself below.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Register players <span class="h2-sub" id="players-count"></span></h2>
+          <form id="regForm" class="reg-form" autocomplete="off">
+            <div id="regFields" class="reg-fields"></div>
+            <div id="regSuggest" class="roster-suggest" hidden></div>
+            <div class="field-row" id="regSkillWrap">
+              <div class="field">
+                <label for="reg-rating">Self-rated level</label>
+                <select id="reg-rating"></select>
+              </div>
+              <div class="field">
+                <label for="reg-years">Years playing badminton</label>
+                <select id="reg-years"></select>
+              </div>
+            </div>
+            <div class="reg-foot">
+              <button class="btn primary" type="submit" id="regSubmit">＋ Add player</button>
+              <button class="btn ghost" type="button" id="btn-cancel-edit" style="display:none">Cancel edit</button>
+              <span class="plan-note" id="regHint"></span>
+            </div>
+          </form>
+          <div id="entryList" class="entry-list"></div>
+        </div>
+      </div>
+
+      <div id="tab-setup" hidden>
+        <div class="grid2">
+          <div class="card">
+            <h2>Tournament settings</h2>
+            <div class="mode-cards">
+              <label class="mode-card">
+                <input type="radio" name="mode" value="singles">
+                <span class="mode-icon">🏸</span>
+                <span class="mode-title">Singles</span>
+                <span class="mode-desc">Individual players, one per entry</span>
+              </label>
+              <label class="mode-card">
+                <input type="radio" name="mode" value="doubles-fixed">
+                <span class="mode-icon">👥</span>
+                <span class="mode-title">Doubles · teams known</span>
+                <span class="mode-desc">Register pairs who already know their partner</span>
+              </label>
+              <label class="mode-card">
+                <input type="radio" name="mode" value="doubles-random">
+                <span class="mode-icon">🎲</span>
+                <span class="mode-title">Doubles · random partners</span>
+                <span class="mode-desc">Register individuals, partners drawn at generation</span>
+              </label>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="set-games">Match format</label>
+                <select id="set-games">
+                  <option value="3">Best of 3 sets</option>
+                  <option value="5">Best of 5 sets</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="set-pts">Set length</label>
+                <select id="set-pts">
+                  <option value="21">21 points · win by 2 (cap 30)</option>
+                  <option value="15">15 points · win by 2 (cap 20)</option>
+                  <option value="11">11 points · win by 2 (cap 15)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="set-format">Stage format</label>
+                <select id="set-format">
+                  <option value="groups">Group stage + knockout</option>
+                  <option value="knockout">Straight knockout</option>
+                </select>
+              </div>
+              <div class="field" id="skillFieldWrap">
+                <label for="set-skill">Skill-based grouping</label>
+                <select id="set-skill">
+                  <option value="off">Off · pure random</option>
+                  <option value="balanced">Balanced · mix levels in each group</option>
+                  <option value="matched">Matched · group by level</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="set-hours">Timeframe (hours)</label>
+                <input id="set-hours" type="number" min="0.5" max="12" step="0.5">
+              </div>
+              <div class="field">
+                <label for="set-start">Start time</label>
+                <input id="set-start" type="time">
+              </div>
+              <div class="field">
+                <label for="set-courts">Courts booked</label>
+                <input id="set-courts" type="number" min="1" max="12" step="1">
+              </div>
+              <div class="field">
+                <label for="set-matchmin">Avg match (min)</label>
+                <input id="set-matchmin" type="number" min="10" max="90" step="5">
+              </div>
+              <div class="field">
+                <label for="set-changeover">Changeover (min)</label>
+                <input id="set-changeover" type="number" min="0" max="15" step="1">
+              </div>
+            </div>
+            <p class="plan-note">A “slot” = one match time + changeover. Each slot can run one game per court.</p>
+          </div>
+          <div class="card">
+            <h2>Tournament plan</h2>
+            <div class="field" id="groupsOverrideWrap">
+              <label for="set-groups">Number of groups</label>
+              <select id="set-groups">
+                <option value="auto">Auto · calculated from time + courts</option>
+                <option value="2">2 groups → Semi-finals + Final</option>
+                <option value="4">4 groups → Quarter-finals + Semi-finals + Final</option>
+                <option value="8">8 groups → R16 + Quarter-finals + Semi-finals + Final</option>
+              </select>
+            </div>
+            <div class="field" id="groupRoundsWrap">
+              <label for="set-grouprounds">Matches per team in group</label>
+              <select id="set-grouprounds">
+                <option value="auto">Full round-robin · play everyone in the group</option>
+                <option value="2">2 matches each</option>
+                <option value="3">3 matches each</option>
+                <option value="4">4 matches each</option>
+                <option value="5">5 matches each</option>
+                <option value="6">6 matches each</option>
+              </select>
+            </div>
+            <div id="plan-body" class="plan-body"></div>
+            <button class="btn primary big" id="btn-generate">⚡ Generate tournament</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-groups" hidden>
+        <div class="card">
+          <h2>Groups <span class="h2-sub" id="groups-sub"></span></h2>
+          <div id="groups-body"></div>
+          <div class="card-foot no-print" id="groupsFoot">
+            <button class="btn ghost" id="btn-regen">↻ Redraw groups (new random draw)</button>
+            <button class="btn primary" id="btn-to-schedule">View schedule →</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-schedule" hidden>
+        <div class="card">
+          <h2>Schedule &amp; live scores</h2>
+          <div id="schedule-body"></div>
+        </div>
+      </div>
+
+      <div id="tab-bracket" hidden>
+        <div class="card">
+          <h2>Standings &amp; knockout</h2>
+          <div id="bracket-body"></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<div id="toast" class="no-print"></div>
+
+<script src="js/config.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "shuttleup",
+  "version": "1.0.0",
+  "description": "ShuttleUp - badminton tournament manager (static site; jsdom is dev-only for the DOM test)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node test/engine.test.mjs && node test/smoke.mjs && node test/dom.test.mjs",
+    "test:engine": "node test/engine.test.mjs",
+    "test:smoke": "node test/smoke.mjs",
+    "test:dom": "node test/dom.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}
